@@ -11,21 +11,12 @@ const Chat = () => {
   const user = useAuth();
   const { websocket } = useChat();
 
-  const token = localStorage.getItem("token");
-  const [connection, setConnection] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<any>([]);
+  if (websocket?.readyState) {
+    websocket.onopen = (event) => {
+      console.log("Opening");
+    };
+  }
 
-  const [convId, setConvId] = useState();
-  const [receiverId, setReceiverId] = useState();
-
-//  if(websocket.readyState){
-//   websocket.addEventlistener("open", () => {
-//     console.log("Connection Established");
-//   });
-//  }
-
-console.log('websocket',websocket);
 
   return (
     <AuthContextProvider>
@@ -33,7 +24,7 @@ console.log('websocket',websocket);
         <main className="w-screen bg-blue-900 flex justify-center items-center">
           <div className="flex w-full max-w-6xl">
             <Conversation />
-            <Chats convId={convId} receiverId={receiverId} />
+            <Chats />
           </div>
         </main>
       </ChatContextProvider>

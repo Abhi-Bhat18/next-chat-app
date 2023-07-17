@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { fetchMessages, sendMessage } from "@/actions/chatActioins";
+import React, { useEffect, useRef, useState } from "react";
+import { fetchMessages, saveMessage } from "@/actions/chatActioins";
+
 import Message from "./Message";
 import useChat from "@/hooks/useChat";
 import useAuth from "@/hooks/useAuth";
 
 const Chats = (props: any) => {
-  const { convId, receiverId, websocket } = useChat();
+  const { convId, receiverId, websocket, messages, messageReducer } = useChat();
   const { user } = useAuth();
 
-  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -17,52 +17,58 @@ const Chats = (props: any) => {
       // fetching the messages based on the conversation
       fetchMessages(convId)
         .then((data) => {
-          console.log(data.messages);
-          setMessages((prev) => [...prev, ...data.messages]);
+          messageReducer({ type: "ADD_MSGS", payload: data.messages });
           setLoading(false);
         })
         .catch((err) => console.log(err));
     }
-  }, [convId, receiverId]);
+  }, [convId]);
+
+
+  //handling the scroll 
+  const scrollRef = useRef<any>(null);
+  useEffect(()=>{
+    console.log('Checking scroll view');
+    scrollRef?.current.scrollIntoView({behaviour : 'smooth'})
+  },[messages])
 
   // Sending messages
   const sendMsg = () => {
     if (message === "") return;
-    const tempMsg = {
-      message,
-      sentBy: user?.id,
-      time: new Date(),
-    };
-    setMessages((prev) => [
-      ...prev,
-      {
+    messageReducer({
+      type: "ADD_MSG",
+      payload: {
         message,
         sentBy: user?.id,
         time: new Date(),
       },
-    ]);
+    });
+
     if (websocket?.readyState) {
       websocket.send(
         JSON.stringify({
           message,
-          setnBy: user?.id,
+          sentBy: user?.id,
           time: new Date(),
           receiverId,
+          convId,
         })
       );
     }
-    sendMessage(message, receiverId)
+    // Saving the message through the rest api
+    saveMessage(message, receiverId)
       .then((data) => {})
       .catch((err) => console.log(err));
     setMessage("");
   };
 
   return (
-    <div className="w-full bg-white overflow-y-scroll h-screen relative">
-      <div className="w-full">
+    <div ref={scrollRef} className="w-full bg-white overflow-y-scroll h-screen relative">
+      <div  className="w-full flex flex-col justify-between">
         {/* <--------------------Messages--------------------> */}
         <div className="space-y-5">
-          {messages.length > 0 &&
+          {messages &&
+            messages.length > 0 &&
             messages?.map((e: any, i: number) => {
               return (
                 <Message
@@ -78,7 +84,7 @@ const Chats = (props: any) => {
         </div>
 
         {/* <----------------Message Input ---------------> */}
-        <div className="absolute bottom-0 w-full py-5 bg-slate-200 shadow-md flex justify-between space-x-5">
+        <div className="absolute sticky bottom-0 w-full py-5 bg-slate-200 shadow-md flex justify-between space-x-5">
           <button>File</button>
           <input
             type="text"

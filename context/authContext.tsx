@@ -54,7 +54,6 @@ export const AuthContextProvider: React.FC<ReactProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log("Calling the checkLogin function");
     checkLogin();
   }, []);
   return (

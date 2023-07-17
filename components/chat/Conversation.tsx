@@ -4,19 +4,18 @@ import { fetchConversations } from "../../actions/chatActioins";
 
 import useChat from "@/hooks/useChat";
 
-const Conversation = (props : any) => {
-  const {setReceiverId,setConvId} = useChat();
+const Conversation = (props: any) => {
+  const { setReceiverId, setConvId } = useChat();
   const [convs, setConvs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     // fetch the conversations of the user and set the latest conversation Id
     fetchConversations()
       .then((data) => {
         setConvs(data);
-        console.log(data[0]._id,data[0].members[0]._id)
-        setConvId(data[0]._id)
-        setReceiverId(data[0].members[0]._id)
+        setConvId(data[0]._id);
+        setReceiverId(data[0].members[0]._id);
         setLoading(false);
       })
       .catch((err) => console.log(err));
@@ -24,6 +23,7 @@ const Conversation = (props : any) => {
 
   return (
     <div className=" w-5/12 overflow-y-scroll bg-slate-200 min-h-screen h-screen flex flex-col py-5 lg:p-5 space-y-5">
+      {/* Search Bar */}
       <div className="sticky top-0">
         <input
           type="text"
@@ -31,13 +31,14 @@ const Conversation = (props : any) => {
           placeholder="Search"
         />
       </div>
+      {/* Conversations */}
       {loading ? (
         <>Loading ....</>
       ) : (
         convs.map((e, i) => {
           return (
             <Chat
-            key={i}
+              key={i}
               imgUrl={e.members[0].imgUrl}
               firstName={e.members[0].firstName}
               lastName={e.members[0].lastName}
@@ -46,11 +47,8 @@ const Conversation = (props : any) => {
           );
         })
       )}
+      {/* Connections to create conversation */}
       Chat with your connections ...
-      {/* <Chat />
-      <Chat />
-      <Chat />
-      <Chat /> */}
     </div>
   );
 };

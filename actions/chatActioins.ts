@@ -32,7 +32,7 @@ export const fetchMessages = async (id: string) => {
 
 
 // save the message to the beloged conversation 
-export const sendMessage = async (message: string, receiverId: any) => {
+export const saveMessage = async (message: string, receiverId: any) => {
   const response = await fetchData(`${BASE_URL}/message`, METHODS.POST, true, {
     message,
     receiverId,
